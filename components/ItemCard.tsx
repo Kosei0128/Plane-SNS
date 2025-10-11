@@ -1,0 +1,81 @@
+"use client";
+
+import Image from "next/image";
+import { ShoppingCart, Star } from "lucide-react";
+import { useCartStore } from "@/lib/cart-store";
+import { useState } from "react";
+
+export type ItemCardProps = {
+  id: string;
+  title: string;
+  price: number;
+  description: string;
+  imageUrl: string;
+  rating?: number;
+  stock?: number;
+};
+
+export function ItemCard({ id, title, price, description, imageUrl, rating = 4.8, stock = 0 }: ItemCardProps) {
+  const addItem = useCartStore((state) => state.addItem);
+  const [isAdding, setIsAdding] = useState(false);
+
+  const handleAddToCart = () => {
+    setIsAdding(true);
+    addItem({ id, title, price });
+    setTimeout(() => setIsAdding(false), 600);
+  };
+
+  return (
+    <article
+      className="group flex flex-col gap-3 rounded-3xl border-2 border-white/60 bg-white/90 p-4 shadow-lg transition hover:-translate-y-1 hover:scale-[1.02] hover:shadow-2xl"
+      aria-labelledby={`item-${id}`}
+    >
+      <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-slate-100 shadow-inner">
+        <Image
+          src={imageUrl}
+          alt={`${title} の商品画像`}
+          fill
+          className="object-cover transition duration-300 group-hover:scale-110 group-hover:rotate-1"
+          sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
+          priority
+        />
+      </div>
+      <header className="flex items-start justify-between gap-2">
+        <h3 id={`item-${id}`} className="text-lg font-bold tracking-tight text-brand-blue">
+          {title}
+        </h3>
+        <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 px-2 py-1 text-xs font-bold text-white shadow-sm">
+          <Star className="h-3 w-3 fill-current" aria-hidden />
+          {rating.toFixed(1)}
+        </span>
+      </header>
+      <p className="line-clamp-2 text-sm text-slate-600">{description}</p>
+      
+      {/* 在庫表示 */}
+      <div className="flex items-center gap-2">
+        <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${
+          stock > 10 
+            ? "bg-green-100 text-green-700" 
+            : stock > 0 
+            ? "bg-yellow-100 text-yellow-700" 
+            : "bg-red-100 text-red-700"
+        }`}>
+          📦 在庫: {stock > 999 ? "999+" : stock}個
+        </span>
+      </div>
+      
+      <div className="mt-auto flex items-center justify-between">
+        <span className="text-xl font-bold text-brand-blue">¥{price.toLocaleString()}</span>
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={isAdding || stock === 0}
+          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-blue to-brand-turquoise px-4 py-2 text-sm font-bold text-white shadow-md transition hover:scale-105 hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ShoppingCart className={`h-4 w-4 ${isAdding ? "animate-bounce" : ""}`} aria-hidden />
+          {stock === 0 ? "在庫切れ" : isAdding ? "追加中..." : "カートに追加"}
+        </button>
+      </div>
+    </article>
+  );
+}
