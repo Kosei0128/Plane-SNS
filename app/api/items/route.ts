@@ -19,9 +19,9 @@ const supabaseAdmin = createClient(
   {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
-    }
-  }
+      persistSession: false,
+    },
+  },
 );
 
 export async function GET() {
@@ -37,7 +37,7 @@ export async function GET() {
     }
 
     // Supabaseのカラム名をフロントエンドの形式に変換
-    const formattedItems = items.map(item => ({
+    const formattedItems = items.map((item) => ({
       id: item.id,
       title: item.title,
       price: item.price,
@@ -45,7 +45,7 @@ export async function GET() {
       imageUrl: item.image_url,
       rating: item.rating,
       stock: item.stock,
-      category: item.category
+      category: item.category,
     }));
 
     return NextResponse.json({ items: formattedItems });

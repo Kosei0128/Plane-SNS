@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { NotificationManager } from "@/components/NotificationManager";
 import "../styles/globals.css";
+
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "Plane SNS",
@@ -10,21 +13,20 @@ export const metadata: Metadata = {
     title: "Plane SNS",
     description: "SNSアカウントの販売と運用をひとつにまとめる Plane SNS のデモマーケット",
     url: "https://plane-sns.example",
-    type: "website"
-  }
+    type: "website",
+  },
 };
 
-export default function RootLayout({
-  children
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja">
-      <body className="flex min-h-screen flex-col bg-gradient-to-br from-[#eff6ff] via-white to-[#e6fff7] text-brand-blue antialiased">
-        <Header />
-        {children}
-        <Footer />
+    <html lang="ja" suppressHydrationWarning>
+      <body className="flex min-h-screen flex-col bg-brand-sand text-brand-blue antialiased dark:bg-dark-gradient dark:text-slate-300">
+        <Providers>
+          <NotificationManager />
+          <Header />
+          <div className="dark:bg-dark-gradient">{children}</div>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

@@ -50,7 +50,9 @@ export class PayPayClient {
   /**
    * Pythonスクリプトを実行
    */
-  private async executePython(input: Record<string, string | number | undefined>): Promise<unknown> {
+  private async executePython(
+    input: Record<string, string | number | undefined>,
+  ): Promise<unknown> {
     return new Promise((resolve, reject) => {
       const python = spawn(this.pythonPath, [this.scriptPath]);
 
@@ -95,11 +97,13 @@ export class PayPayClient {
       });
 
       // 入力データを送信
-      python.stdin.write(JSON.stringify({
-        ...input,
-        access_token: this.accessToken,
-        refresh_token: this.refreshToken
-      }));
+      python.stdin.write(
+        JSON.stringify({
+          ...input,
+          access_token: this.accessToken,
+          refresh_token: this.refreshToken,
+        }),
+      );
       python.stdin.end();
     });
   }
@@ -110,22 +114,25 @@ export class PayPayClient {
   async checkLink(linkUrl: string): Promise<PayPayLinkInfo> {
     return this.executePython({
       action: "link_check",
-      link_url: linkUrl
+      link_url: linkUrl,
     }) as Promise<PayPayLinkInfo>;
   }
 
   /**
    * 送金リンクを受け取る
    */
-  async receiveLink(linkUrl: string, passcode?: string): Promise<{
+  async receiveLink(
+    linkUrl: string,
+    passcode?: string,
+  ): Promise<{
     message: string;
     balance: PayPayBalance;
   }> {
     return this.executePython({
       action: "link_receive",
       link_url: linkUrl,
-      passcode
-    }) as Promise<{ message: string; balance: PayPayBalance; }>;
+      passcode,
+    }) as Promise<{ message: string; balance: PayPayBalance }>;
   }
 
   /**
@@ -134,21 +141,18 @@ export class PayPayClient {
   async rejectLink(linkUrl: string): Promise<{ message: string }> {
     return this.executePython({
       action: "link_reject",
-      link_url: linkUrl
+      link_url: linkUrl,
     }) as Promise<{ message: string }>;
   }
 
   /**
    * 送金リンクを作成
    */
-  async createLink(
-    amount: number,
-    passcode?: string
-  ): Promise<PayPayCreateLinkResult> {
+  async createLink(amount: number, passcode?: string): Promise<PayPayCreateLinkResult> {
     return this.executePython({
       action: "create_link",
       amount,
-      passcode
+      passcode,
     }) as Promise<PayPayCreateLinkResult>;
   }
 
@@ -157,7 +161,7 @@ export class PayPayClient {
    */
   async getBalance(): Promise<PayPayBalance> {
     return this.executePython({
-      action: "get_balance"
+      action: "get_balance",
     }) as Promise<PayPayBalance>;
   }
 
@@ -165,9 +169,9 @@ export class PayPayClient {
    * トークンをリフレッシュ
    */
   async refreshTokens(): Promise<PayPayTokens> {
-    const result = await this.executePython({
-      action: "token_refresh"
-    }) as PayPayTokens;
+    const result = (await this.executePython({
+      action: "token_refresh",
+    })) as PayPayTokens;
 
     // 新しいトークンを保存
     this.accessToken = result.access_token;
@@ -200,10 +204,10 @@ export function getPayPayClient(): PayPayClient {
   if (!paypayClientInstance) {
     const accessToken = process.env.PAYPAY_ACCESS_TOKEN;
     const refreshToken = process.env.PAYPAY_REFRESH_TOKEN;
-    
+
     paypayClientInstance = new PayPayClient(accessToken, refreshToken);
   }
-  
+
   return paypayClientInstance;
 }
 

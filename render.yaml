@@ -15,11 +15,11 @@ services:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
-      
+
       # Admin
       - key: ADMIN_SESSION_SECRET
         sync: false
-      
+
       # PayPay
       - key: PAYPAY_ACCESS_TOKEN
         sync: false
@@ -27,7 +27,7 @@ services:
         sync: false
       - key: PYTHON_PATH
         value: python3
-      
+
       # Node Environment
       - key: NODE_ENV
         value: production

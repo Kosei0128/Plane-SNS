@@ -26,7 +26,7 @@ export function HomeAuthPanel() {
     email: "",
     password: "",
     fullName: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +45,9 @@ export function HomeAuthPanel() {
     if (!captchaToken) return false;
     if (!form.email || !form.password) return false;
     if (mode === "signup") {
-      return Boolean(form.fullName && form.confirmPassword && form.password === form.confirmPassword);
+      return Boolean(
+        form.fullName && form.confirmPassword && form.password === form.confirmPassword,
+      );
     }
     return true;
   }, [captchaToken, form, mode]);
@@ -68,7 +70,7 @@ export function HomeAuthPanel() {
     try {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: form.email,
-        password: form.password
+        password: form.password,
       });
 
       if (signInError) throw signInError;
@@ -113,9 +115,9 @@ export function HomeAuthPanel() {
         password: form.password,
         options: {
           data: {
-            full_name: form.fullName
-          }
-        }
+            full_name: form.fullName,
+          },
+        },
       });
 
       if (signUpError) throw signUpError;
@@ -142,8 +144,8 @@ export function HomeAuthPanel() {
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
-        }
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
       if (oauthError) throw oauthError;
     } catch (err: unknown) {
@@ -153,7 +155,10 @@ export function HomeAuthPanel() {
   };
 
   return (
-    <section id="auth" className="mx-auto grid w-full max-w-7xl gap-12 rounded-3xl bg-white/60 px-6 py-12 shadow-xl ring-1 ring-brand-blue/10 backdrop-blur">
+    <section
+      id="auth"
+      className="mx-auto grid w-full max-w-7xl gap-12 rounded-3xl bg-white/60 px-6 py-12 shadow-xl ring-1 ring-brand-blue/10 backdrop-blur"
+    >
       <div className="flex flex-col gap-4 text-center">
         <span className="mx-auto inline-flex items-center rounded-full bg-brand-blue/10 px-4 py-1 text-sm font-semibold text-brand-blue">
           アカウントを作成して始めましょう
@@ -211,7 +216,10 @@ export function HomeAuthPanel() {
           {mode === "login" ? (
             <form onSubmit={handleEmailLogin} className="space-y-4">
               <div>
-                <label htmlFor="home-email" className="mb-2 block text-sm font-semibold text-slate-700">
+                <label
+                  htmlFor="home-email"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                >
                   メールアドレス
                 </label>
                 <div className="relative">
@@ -229,7 +237,10 @@ export function HomeAuthPanel() {
               </div>
 
               <div>
-                <label htmlFor="home-password" className="mb-2 block text-sm font-semibold text-slate-700">
+                <label
+                  htmlFor="home-password"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                >
                   パスワード
                 </label>
                 <div className="relative">
@@ -247,22 +258,23 @@ export function HomeAuthPanel() {
               </div>
 
               <div className="flex justify-between text-sm text-brand-blue">
-                <Link href="/auth/reset-password" className="inline-flex items-center gap-1 hover:text-brand-turquoise">
+                <Link
+                  href="/auth/reset-password"
+                  className="inline-flex items-center gap-1 hover:text-brand-turquoise"
+                >
                   <ArrowRight className="h-4 w-4" />
                   パスワードをお忘れですか？
                 </Link>
               </div>
 
               <div className="flex justify-center">
-                <ReCAPTCHA
-                  ref={recaptchaRef}
-                  sitekey={defaultSiteKey}
-                  onChange={setCaptchaToken}
-                />
+                <ReCAPTCHA ref={recaptchaRef} sitekey={defaultSiteKey} onChange={setCaptchaToken} />
               </div>
 
               {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>}
-              {message && <p className="rounded-lg bg-green-50 p-3 text-sm text-green-600">{message}</p>}
+              {message && (
+                <p className="rounded-lg bg-green-50 p-3 text-sm text-green-600">{message}</p>
+              )}
 
               <button
                 type="submit"
@@ -275,7 +287,10 @@ export function HomeAuthPanel() {
           ) : (
             <form onSubmit={handleEmailSignUp} className="space-y-4">
               <div>
-                <label htmlFor="home-full-name" className="mb-2 block text-sm font-semibold text-slate-700">
+                <label
+                  htmlFor="home-full-name"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                >
                   お名前
                 </label>
                 <div className="relative">
@@ -293,7 +308,10 @@ export function HomeAuthPanel() {
               </div>
 
               <div>
-                <label htmlFor="home-signup-email" className="mb-2 block text-sm font-semibold text-slate-700">
+                <label
+                  htmlFor="home-signup-email"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                >
                   メールアドレス
                 </label>
                 <div className="relative">
@@ -311,7 +329,10 @@ export function HomeAuthPanel() {
               </div>
 
               <div>
-                <label htmlFor="home-signup-password" className="mb-2 block text-sm font-semibold text-slate-700">
+                <label
+                  htmlFor="home-signup-password"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                >
                   パスワード
                 </label>
                 <div className="relative">
@@ -330,7 +351,10 @@ export function HomeAuthPanel() {
               </div>
 
               <div>
-                <label htmlFor="home-confirm-password" className="mb-2 block text-sm font-semibold text-slate-700">
+                <label
+                  htmlFor="home-confirm-password"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                >
                   パスワード（確認）
                 </label>
                 <div className="relative">
@@ -349,15 +373,13 @@ export function HomeAuthPanel() {
               </div>
 
               <div className="flex justify-center">
-                <ReCAPTCHA
-                  ref={recaptchaRef}
-                  sitekey={defaultSiteKey}
-                  onChange={setCaptchaToken}
-                />
+                <ReCAPTCHA ref={recaptchaRef} sitekey={defaultSiteKey} onChange={setCaptchaToken} />
               </div>
 
               {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>}
-              {message && <p className="rounded-lg bg-green-50 p-3 text-sm text-green-600">{message}</p>}
+              {message && (
+                <p className="rounded-lg bg-green-50 p-3 text-sm text-green-600">{message}</p>
+              )}
 
               <button
                 type="submit"
@@ -371,7 +393,10 @@ export function HomeAuthPanel() {
 
           <p className="text-center text-xs text-slate-500">
             詳細なフローが必要な場合は
-            <Link href={mode === "login" ? "/auth/login" : "/auth/signup"} className="px-1 text-brand-blue hover:text-brand-turquoise">
+            <Link
+              href={mode === "login" ? "/auth/login" : "/auth/signup"}
+              className="px-1 text-brand-blue hover:text-brand-turquoise"
+            >
               専用ページ
             </Link>
             もご利用いただけます。
