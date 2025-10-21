@@ -50,18 +50,7 @@ export default function AdminInventoryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItemId]);
 
-  const fetchItems = async () => {
-    try {
-      const res = await fetch("/api/items");
-      const data = await res.json();
-      setItems(data.items || []);
-      if (data.items && data.items.length > 0 && !selectedItemId) {
-        setSelectedItemId(data.items[0].id);
-      }
-    } catch (error) {
-      console.error("Failed to fetch items:", error);
-    }
-  };
+
 
   const fetchAvailableAccounts = async (itemId: string) => {
     setIsAccountsLoading(true);
