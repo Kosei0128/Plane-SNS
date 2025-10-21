@@ -43,24 +43,7 @@ export default function AdminUsersPage() {
     loadUsers();
   }, [loadUsers]);
 
-  const loadUsers = async () => {
-    try {
-      // The browser automatically sends the HttpOnly cookie, so no headers are needed.
-      const res = await fetch("/api/site-control-a4b7/users");
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setUsers(data.users);
-      } else {
-        console.error("Failed to load users:", data.message);
-        // If unauthorized, redirect to login
-        if (res.status === 401) {
-          router.push("/site-control-a4b7");
-        }
-      }
-    } catch (error) {
-      console.error("Failed to load users:", error);
-    }
-  };
+
 
   const handleEditBalance = (user: User) => {
     setEditingUser(user);
