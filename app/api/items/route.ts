@@ -6,7 +6,7 @@ export type Item = {
   title: string;
   price: number;
   description: string;
-  imageUrl: string;
+  image_url: string;
   rating: number;
   stock: number;
   category: string;
@@ -36,13 +36,13 @@ export async function GET() {
       return NextResponse.json({ items: [] });
     }
 
-    // Supabaseのカラム名をフロントエンドの形式に変換
+    // Supabaseのスキーマに合わせて image_url をそのまま返す
     const formattedItems = items.map((item) => ({
       id: item.id,
       title: item.title,
       price: item.price,
       description: item.description,
-      imageUrl: item.image_url,
+      image_url: item.image_url,
       rating: item.rating,
       stock: item.stock,
       category: item.category,

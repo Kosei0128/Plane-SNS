@@ -189,7 +189,7 @@ export function SearchableItemGrid() {
               title={item.title}
               price={item.price}
               description={item.description}
-              imageUrl={item.imageUrl}
+              image_url={item.image_url}
               rating={item.rating}
               stock={item.stock}
             />

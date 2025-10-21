@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
       title: item.title,
       price: item.price,
       description: item.description,
-      imageUrl: item.image_url,
+      image_url: item.image_url,
       rating: item.rating,
       stock: item.stock,
       category: item.category,

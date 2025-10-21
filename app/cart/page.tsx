@@ -133,7 +133,7 @@ export default function CartPage() {
               <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-700">
                 <Image
                   src={
-                    item.imageUrl ||
+                    item.image_url ||
                     `https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop`
                   }
                   alt={item.title}

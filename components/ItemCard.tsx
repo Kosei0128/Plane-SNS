@@ -11,7 +11,7 @@ export type ItemCardProps = {
   title: string;
   price: number;
   description: string;
-  imageUrl: string;
+  image_url: string;
   rating?: number;
   stock?: number;
 };
@@ -21,7 +21,7 @@ export function ItemCard({
   title,
   price,
   description,
-  imageUrl,
+  image_url,
   rating = 4.8,
   stock = 0,
 }: ItemCardProps) {
@@ -31,7 +31,7 @@ export function ItemCard({
 
   const handleAddToCart = () => {
     setIsAdding(true);
-    addItem({ id, title, price });
+    addItem({ id, title, price, image_url });
     addNotification({
       message: `${title} をカートに追加しました`,
       type: "success",
@@ -46,7 +46,7 @@ export function ItemCard({
     >
       <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-slate-100 shadow-inner dark:bg-dark-elevated">
         <Image
-          src={imageUrl}
+          src={image_url}
           alt={`${title} の商品画像`}
           fill
           className="object-cover transition duration-300 group-hover:scale-110 group-hover:rotate-1"
