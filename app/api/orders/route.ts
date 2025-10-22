@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { createOrderSchema } from "@/lib/validation/schemas";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "@/lib/constants";
+import type { CreateOrderRequest, CreateOrderResponse, ApiError } from "@/types/api";
 
 // Supabase Admin Client
 const supabaseAdmin = createClient(
@@ -13,30 +16,25 @@ const supabaseAdmin = createClient(
   },
 );
 
-export type OrderItem = {
-  itemId: string;
-  itemTitle: string;
-  price: number;
-  quantity: number;
-  accountInfo: string; // 購入したアカウント情報
-};
-
-export type CreateOrderRequest = {
-  items: OrderItem[];
-  totalAmount: number;
-};
-
 /**
  * 注文を作成し、購入したアカウント情報を保存
  * POST /api/orders
+ * 
+ * トランザクション処理により、データの整合性を保証します
  */
 export async function POST(request: NextRequest) {
   try {
     console.log("=== Order Creation Started ===");
 
+    // ============================================
+    // 1. 認証チェック
+    // ============================================
     const authHeader = request.headers.get("authorization");
     if (!authHeader) {
-      return NextResponse.json({ success: false, message: "認証が必要です" }, { status: 401 });
+      return NextResponse.json<ApiError>(
+        { success: false, message: ERROR_MESSAGES.AUTH_REQUIRED },
+        { status: 401 }
+      );
     }
 
     const token = authHeader.replace("Bearer ", "");
@@ -46,146 +44,88 @@ export async function POST(request: NextRequest) {
     } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !user) {
-      return NextResponse.json({ success: false, message: "認証が必要です" }, { status: 401 });
+      return NextResponse.json<ApiError>(
+        { success: false, message: ERROR_MESSAGES.AUTH_REQUIRED },
+        { status: 401 }
+      );
     }
 
     console.log("User authenticated:", user.id);
 
+    // ============================================
+    // 2. リクエストボディの検証
+    // ============================================
     const body: CreateOrderRequest = await request.json();
-    const { items, totalAmount } = body;
 
-    if (!items || items.length === 0 || !totalAmount || totalAmount < 0) {
-      return NextResponse.json({ success: false, message: "注文内容が不正です" }, { status: 400 });
-    }
-
-    // 在庫チェックと確保
-    const reservedAccounts: {
-      item: OrderItem;
-      accounts: { id: string; account_info: string }[];
-    }[] = [];
-    for (const item of items) {
-      const { data: availableAccounts, error: stockError } = await supabaseAdmin
-        .from("purchased_accounts")
-        .select("id, account_info")
-        .eq("item_id", item.itemId)
-        .eq("is_purchased", false)
-        .limit(item.quantity);
-
-      if (stockError || availableAccounts.length < item.quantity) {
-        return NextResponse.json(
-          { success: false, message: `在庫不足です: ${item.itemTitle}` },
-          { status: 400 },
-        );
-      }
-      reservedAccounts.push({ item, accounts: availableAccounts });
-    }
-
-    // ユーザー残高チェック
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from("profiles")
-      .select("credit_balance")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError || !profile || (profile.credit_balance || 0) < totalAmount) {
-      return NextResponse.json(
-        { success: false, message: "残高が不足しています" },
-        { status: 400 },
+    const validation = createOrderSchema.safeParse(body);
+    if (!validation.success) {
+      const errors = validation.error.errors.map((err) => `${err.path.join(".")}: ${err.message}`);
+      return NextResponse.json<ApiError>(
+        {
+          success: false,
+          message: ERROR_MESSAGES.INVALID_INPUT,
+          error: errors.join(", "),
+        },
+        { status: 400 }
       );
     }
 
-    // トランザクション的な処理を開始
-    // 1. 注文を作成
-    const { data: order, error: orderError } = await supabaseAdmin
-      .from("orders")
-      .insert({ user_id: user.id, total: totalAmount, status: "completed" })
-      .select()
-      .single();
+    const { items, totalAmount } = validation.data;
 
-    if (orderError) {
-      throw new Error(`注文の作成に失敗しました: ${orderError.message}`);
-    }
+    // ============================================
+    // 3. ストアドプロシージャを使用してトランザクション処理
+    // ============================================
+    const itemsJson = items.map((item) => ({
+      itemId: item.itemId,
+      itemTitle: item.itemTitle,
+      price: item.price,
+      quantity: item.quantity,
+    }));
 
-    // 2. 注文アイテムの作成と在庫の更新
-    const updatePromises = reservedAccounts.flatMap(({ item, accounts }) => {
-      const orderItemPromise = supabaseAdmin.from("order_items").insert({
-        order_id: order.id,
-        item_id: item.itemId,
-        quantity: item.quantity,
-        price: item.price,
-      });
-
-      const accountUpdatePromise = supabaseAdmin
-        .from("purchased_accounts")
-        .update({ is_purchased: true, order_id: order.id, purchased_at: new Date().toISOString() })
-        .in(
-          "id",
-          accounts.map((acc) => acc.id),
-        );
-
-      return [orderItemPromise, accountUpdatePromise];
+    const { data: result, error: rpcError } = await supabaseAdmin.rpc("create_order_transaction", {
+      p_user_id: user.id,
+      p_items: itemsJson,
+      p_total_amount: totalAmount,
     });
 
-    const results = await Promise.all(updatePromises);
-    const failedUpdates = results.filter((res) => res.error);
-    if (failedUpdates.length > 0) {
-      // 本来はここでロールバック処理が必要
-      console.error("Failed to update order items or accounts:", failedUpdates);
-      return NextResponse.json(
-        { success: false, message: "注文処理中にエラーが発生しました。" },
-        { status: 500 },
+    if (rpcError) {
+      console.error("Transaction error:", rpcError);
+
+      // エラーメッセージから具体的な問題を判定
+      if (rpcError.message.includes("残高が不足")) {
+        return NextResponse.json<ApiError>(
+          { success: false, message: ERROR_MESSAGES.INSUFFICIENT_BALANCE },
+          { status: 400 }
+        );
+      }
+
+      if (rpcError.message.includes("在庫不足")) {
+        return NextResponse.json<ApiError>(
+          { success: false, message: rpcError.message },
+          { status: 400 }
+        );
+      }
+
+      return NextResponse.json<ApiError>(
+        { success: false, message: ERROR_MESSAGES.SERVER_ERROR, error: rpcError.message },
+        { status: 500 }
       );
     }
-
-    // 3. ユーザー残高を更新 & 取引履歴を記録
-    const balanceBefore = profile.credit_balance;
-    const newBalance = balanceBefore - totalAmount;
-
-    const { error: balanceError } = await supabaseAdmin
-      .from("profiles")
-      .update({ credit_balance: newBalance })
-      .eq("id", user.id);
-
-    if (balanceError) {
-      // 本来はここでロールバック処理が必要
-      console.error("Failed to update user balance:", balanceError);
-    } else {
-      // 残高更新が成功した場合のみ取引履歴を記録
-      const { error: transactionError } = await supabaseAdmin.from("balance_transactions").insert({
-        user_id: user.id,
-        amount: -totalAmount,
-        type: "purchase",
-        order_id: order.id,
-        balance_before: balanceBefore,
-        balance_after: newBalance,
-      });
-
-      if (transactionError) {
-        // こちらもロールバックが必要なシナリオ
-        console.error("Failed to record balance transaction:", transactionError);
-      }
-    }
-
-    const purchasedItems = reservedAccounts.flatMap(({ item, accounts }) =>
-      accounts.map((acc) => ({
-        itemTitle: item.itemTitle,
-        accountInfo: acc.account_info,
-      })),
-    );
 
     console.log("=== Order Creation Completed Successfully ===");
-    return NextResponse.json({
+
+    return NextResponse.json<CreateOrderResponse>({
       success: true,
-      orderId: order.id,
-      purchasedItems: purchasedItems,
-      message: "注文が完了しました",
+      orderId: result.orderId,
+      purchasedItems: result.purchasedItems,
+      message: SUCCESS_MESSAGES.ORDER_CREATED,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "不明なエラー";
+    const message = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
     console.error("=== Order Creation Error ===", message);
-    return NextResponse.json(
-      { success: false, message: `サーバーエラー: ${message}` },
-      { status: 500 },
+    return NextResponse.json<ApiError>(
+      { success: false, message: ERROR_MESSAGES.SERVER_ERROR, error: message },
+      { status: 500 }
     );
   }
 }
@@ -206,29 +146,45 @@ interface PurchasedAccountFromDB {
 /**
  * ユーザーの注文履歴を取得
  * GET /api/orders
+ * 
+ * ページネーションに対応しています
  */
 export async function GET(request: NextRequest) {
   try {
-    // Authorization ヘッダーからトークンを取得
+    // ============================================
+    // 1. 認証チェック
+    // ============================================
     const authHeader = request.headers.get("authorization");
     if (!authHeader) {
-      return NextResponse.json({ success: false, message: "認証が必要です" }, { status: 401 });
+      return NextResponse.json<ApiError>(
+        { success: false, message: ERROR_MESSAGES.AUTH_REQUIRED },
+        { status: 401 }
+      );
     }
 
     const token = authHeader.replace("Bearer ", "");
-
-    // トークンからユーザー情報を取得
     const {
       data: { user },
       error: authError,
     } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !user) {
-      return NextResponse.json({ success: false, message: "認証が必要です" }, { status: 401 });
+      return NextResponse.json<ApiError>(
+        { success: false, message: ERROR_MESSAGES.AUTH_REQUIRED },
+        { status: 401 }
+      );
     }
 
     // ============================================
-    // 注文履歴を取得（注文アイテムと購入アカウント情報を含む）
+    // 2. ページネーションパラメータの取得
+    // ============================================
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "20", 10);
+    const offset = (page - 1) * limit;
+
+    // ============================================
+    // 3. 注文履歴を取得（注文アイテムと購入アカウント情報を含む）
     // ============================================
     const { data: orders, error: ordersError } = await supabaseAdmin
       .from("orders")
@@ -249,18 +205,19 @@ export async function GET(request: NextRequest) {
       `,
       )
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
 
     if (ordersError) {
       console.error("Failed to fetch orders:", ordersError);
-      return NextResponse.json(
-        { success: false, message: "注文履歴の取得に失敗しました" },
-        { status: 500 },
+      return NextResponse.json<ApiError>(
+        { success: false, message: ERROR_MESSAGES.DATABASE_ERROR },
+        { status: 500 }
       );
     }
 
     // ============================================
-    // 商品情報を取得してマージ
+    // 4. 商品情報を取得してマージ
     // ============================================
     const itemIds = Array.from(
       new Set(
@@ -283,7 +240,7 @@ export async function GET(request: NextRequest) {
     // 注文データを整形
     const formattedOrders = orders.map((order) => ({
       id: order.id,
-      totalAmount: order.total, // カラム名は 'total' (total_amount ではない)
+      totalAmount: order.total,
       status: order.status,
       createdAt: order.created_at,
       items: order.order_items.map((orderItem: OrderItemFromDB) => {
@@ -310,6 +267,10 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Orders fetch error:", error);
-    return NextResponse.json({ success: false, message: "サーバーエラー" }, { status: 500 });
+    return NextResponse.json<ApiError>(
+      { success: false, message: ERROR_MESSAGES.SERVER_ERROR },
+      { status: 500 }
+    );
   }
 }
+
