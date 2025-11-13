@@ -1,7 +1,7 @@
 /**
  * レート制限ミドルウェア
  * Upstash Redisを使用してAPIリクエストのレート制限を実装します
- * 
+ *
  * 環境変数が設定されていない場合は、メモリベースのフォールバックを使用します
  */
 
@@ -23,7 +23,7 @@ const redis =
 const createRateLimiter = (maxRequests: number, windowMs: number) => {
   if (!redis) {
     console.warn(
-      "⚠️ Upstash Redis not configured. Using in-memory rate limiting (not recommended for production)."
+      "⚠️ Upstash Redis not configured. Using in-memory rate limiting (not recommended for production).",
     );
     // メモリベースのフォールバック（開発環境用）
     return null;
@@ -39,17 +39,17 @@ const createRateLimiter = (maxRequests: number, windowMs: number) => {
 // 各エンドポイントタイプ用のレート制限インスタンス
 export const defaultRateLimiter = createRateLimiter(
   RATE_LIMIT.DEFAULT.MAX_REQUESTS,
-  RATE_LIMIT.DEFAULT.WINDOW_MS
+  RATE_LIMIT.DEFAULT.WINDOW_MS,
 );
 
 export const authRateLimiter = createRateLimiter(
   RATE_LIMIT.AUTH.MAX_REQUESTS,
-  RATE_LIMIT.AUTH.WINDOW_MS
+  RATE_LIMIT.AUTH.WINDOW_MS,
 );
 
 export const paymentRateLimiter = createRateLimiter(
   RATE_LIMIT.PAYMENT.MAX_REQUESTS,
-  RATE_LIMIT.PAYMENT.WINDOW_MS
+  RATE_LIMIT.PAYMENT.WINDOW_MS,
 );
 
 /**
@@ -92,7 +92,7 @@ const inMemoryLimiter = new InMemoryRateLimiter();
 
 /**
  * レート制限を適用するヘルパー関数
- * 
+ *
  * @param request NextRequest オブジェクト
  * @param limiter 使用するレート制限インスタンス
  * @param maxRequests 最大リクエスト数（メモリベース用）
@@ -103,7 +103,7 @@ export async function applyRateLimit(
   request: NextRequest,
   limiter: Ratelimit | null,
   maxRequests: number = RATE_LIMIT.DEFAULT.MAX_REQUESTS,
-  windowMs: number = RATE_LIMIT.DEFAULT.WINDOW_MS
+  windowMs: number = RATE_LIMIT.DEFAULT.WINDOW_MS,
 ) {
   // IPアドレスまたはユーザーIDを識別子として使用
   const identifier = getIdentifier(request);
@@ -116,12 +116,16 @@ export async function applyRateLimit(
   // Upstash Redisを使用
   const result = await limiter.limit(identifier);
 
-  return result;
+  // RatelimitResponseのresetはnumber（Unix timestamp）なので、Dateに変換
+  return {
+    ...result,
+    reset: new Date(result.reset),
+  };
 }
 
 /**
  * リクエストの識別子を取得
- * 
+ *
  * @param request NextRequest オブジェクト
  * @returns 識別子（IPアドレスまたはユーザーID）
  */
@@ -143,7 +147,7 @@ function getIdentifier(request: NextRequest): string {
 
 /**
  * レート制限エラーレスポンスを生成
- * 
+ *
  * @param result レート制限の結果
  * @returns NextResponse
  */
@@ -159,7 +163,7 @@ export function createRateLimitResponse(result: {
       message: "リクエストが多すぎます。しばらくしてから再試行してください。",
       error: ERROR_MESSAGES.SERVER_ERROR,
     },
-    { status: 429 }
+    { status: 429 },
   );
 
   // レート制限情報をヘッダーに追加
@@ -172,17 +176,13 @@ export function createRateLimitResponse(result: {
 
 /**
  * レート制限を適用するデコレーター関数
- * 
+ *
  * @param limiter 使用するレート制限インスタンス
  * @param maxRequests 最大リクエスト数（メモリベース用）
  * @param windowMs ウィンドウ時間（メモリベース用）
  * @returns デコレーター関数
  */
-export function withRateLimit(
-  limiter: Ratelimit | null,
-  maxRequests?: number,
-  windowMs?: number
-) {
+export function withRateLimit(limiter: Ratelimit | null, maxRequests?: number, windowMs?: number) {
   return function (handler: (request: NextRequest) => Promise<NextResponse>) {
     return async function (request: NextRequest): Promise<NextResponse> {
       const result = await applyRateLimit(request, limiter, maxRequests, windowMs);
@@ -195,4 +195,3 @@ export function withRateLimit(
     };
   };
 }
-

@@ -11,7 +11,7 @@ export type AdminUser = {
 /**
  * 管理者認証情報の取得
  * 環境変数から管理者情報を取得します
- * 
+ *
  * セキュリティ上の理由から、以下の対策を実施してください:
  * 1. 環境変数に認証情報を設定
  * 2. パスワードはbcryptでハッシュ化
@@ -24,14 +24,10 @@ const getAdminUsers = () => {
   const editorPasswordHash = process.env.EDITOR_PASSWORD_HASH;
 
   if (!adminPasswordHash || !editorPasswordHash) {
+    console.warn("⚠️ WARNING: Admin password hashes not set in environment variables.");
+    console.warn("⚠️ Please set ADMIN_PASSWORD_HASH and EDITOR_PASSWORD_HASH in production.");
     console.warn(
-      "⚠️ WARNING: Admin password hashes not set in environment variables."
-    );
-    console.warn(
-      "⚠️ Please set ADMIN_PASSWORD_HASH and EDITOR_PASSWORD_HASH in production."
-    );
-    console.warn(
-      "⚠️ Generate hash: node -e \"const bcrypt = require('bcryptjs'); console.log(bcrypt.hashSync('your-password', 10));\""
+      "⚠️ Generate hash: node -e \"const bcrypt = require('bcryptjs'); console.log(bcrypt.hashSync('your-password', 10));\"",
     );
 
     // 開発環境用のデフォルト値（本番環境では絶対に使用しないこと）
@@ -80,14 +76,14 @@ const secretKey = new TextEncoder().encode(JWT_SECRET);
 /**
  * 管理者認証情報を検証します
  * パスワードはbcryptでハッシュ化されたものと比較します
- * 
+ *
  * @param username 管理者のユーザー名
  * @param password 管理者のパスワード（平文）
  * @returns 認証が成功した場合はユーザー情報、失敗した場合はnull
  */
 export async function validateAdminCredentials(
   username: string,
-  password: string
+  password: string,
 ): Promise<(Omit<AdminUser, "id"> & { id: string }) | null> {
   const adminUsers = getAdminUsers();
   const user = adminUsers.find((u) => u.username === username);
@@ -112,7 +108,7 @@ export async function validateAdminCredentials(
 
 /**
  * 管理者用のJWTトークンを生成します
- * 
+ *
  * @param user トークンに含めるユーザー情報
  * @returns 署名されたJWTトークン
  */
@@ -133,7 +129,7 @@ export async function createAdminSession(user: AdminUser): Promise<string> {
 
 /**
  * JWTトークンを検証し、ペイロードを返します
- * 
+ *
  * @param token 検証するJWTトークン
  * @returns トークンが有効な場合はユーザー情報、無効な場合はnull
  */

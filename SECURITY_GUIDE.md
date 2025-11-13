@@ -73,8 +73,8 @@ Supabaseのデータベースでは、Row Level Security (RLS)を使用してデ
 
 ```sql
 -- RLSの有効化状態を確認
-SELECT tablename, rowsecurity 
-FROM pg_tables 
+SELECT tablename, rowsecurity
+FROM pg_tables
 WHERE schemaname = 'public';
 ```
 
@@ -117,10 +117,12 @@ Zodを使用して、入力データのバリデーションを行います。
 import { z } from "zod";
 
 const orderSchema = z.object({
-  items: z.array(z.object({
-    itemId: z.string().uuid(),
-    quantity: z.number().int().min(1).max(99),
-  })),
+  items: z.array(
+    z.object({
+      itemId: z.string().uuid(),
+      quantity: z.number().int().min(1).max(99),
+    }),
+  ),
   totalAmount: z.number().int().min(1),
 });
 ```
@@ -132,10 +134,7 @@ Supabaseのクエリビルダーを使用することで、SQLインジェクシ
 **安全な例**:
 
 ```typescript
-const { data } = await supabase
-  .from("items")
-  .select("*")
-  .eq("category", userInput);
+const { data } = await supabase.from("items").select("*").eq("category", userInput);
 ```
 
 **危険な例（使用しないでください）**:
@@ -188,31 +187,31 @@ export default {
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: "/:path*",
         headers: [
           {
-            key: 'X-Frame-Options',
-            value: 'DENY',
+            key: "X-Frame-Options",
+            value: "DENY",
           },
           {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
+            key: "X-Content-Type-Options",
+            value: "nosniff",
           },
           {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
           },
           {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
           },
           {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
           },
           {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains',
+            key: "Strict-Transport-Security",
+            value: "max-age=31536000; includeSubDomains",
           },
         ],
       },
@@ -314,34 +313,41 @@ GitHub Dependabotを有効化して、自動的に依存関係を更新してく
 デプロイ前に以下の項目を確認してください:
 
 ### 認証
+
 - [ ] 管理者パスワードがbcryptでハッシュ化されている
 - [ ] JWT Secretが強力で秘密に保たれている
 - [ ] セッション有効期限が適切に設定されている
 
 ### データ保護
+
 - [ ] すべてのテーブルでRLSが有効化されている
 - [ ] HTTPSが有効化されている
 - [ ] 機密情報が適切に保護されている
 
 ### 入力バリデーション
+
 - [ ] すべてのAPIエンドポイントで入力検証を実施
 - [ ] SQLインジェクション対策が実装されている
 - [ ] XSS対策が実装されている
 
 ### レート制限
+
 - [ ] 重要なエンドポイントにレート制限が設定されている
 - [ ] レート制限の閾値が適切に設定されている
 
 ### セキュリティヘッダー
+
 - [ ] セキュリティヘッダーが設定されている
 - [ ] CSPが設定されている（オプション）
 
 ### 環境変数
+
 - [ ] 機密情報が環境変数に保存されている
 - [ ] `.env`ファイルが`.gitignore`に含まれている
 - [ ] 本番環境の環境変数が正しく設定されている
 
 ### 監査
+
 - [ ] 依存関係の脆弱性がチェックされている
 - [ ] Dependabotが有効化されている
 - [ ] ログ監視が設定されている
@@ -361,4 +367,3 @@ GitHub Dependabotを有効化して、自動的に依存関係を更新してく
 - セキュリティ脆弱性の報告: security-report@plane-sns.com
 
 **重要**: セキュリティ脆弱性を発見した場合は、公開する前に必ず私たちに報告してください。
-

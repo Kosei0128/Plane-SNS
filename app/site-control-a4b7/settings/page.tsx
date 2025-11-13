@@ -4,8 +4,6 @@ import Link from "next/link";
 import { ArrowLeft, Settings } from "lucide-react";
 
 export default function AdminSettingsPage() {
-
-
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">

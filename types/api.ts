@@ -198,4 +198,3 @@ export interface ValidationError {
 export interface ValidationErrorResponse extends ApiError {
   errors: ValidationError[];
 }
-

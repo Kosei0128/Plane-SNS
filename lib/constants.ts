@@ -92,14 +92,7 @@ export const TRANSACTION_TYPE = {
 // カテゴリー
 // ============================================
 
-export const CATEGORIES = [
-  "ゲーム",
-  "SNS",
-  "動画配信",
-  "音楽",
-  "ビジネス",
-  "その他",
-] as const;
+export const CATEGORIES = ["ゲーム", "SNS", "動画配信", "音楽", "ビジネス", "その他"] as const;
 
 // ============================================
 // エラーメッセージ
@@ -141,4 +134,3 @@ export const SUCCESS_MESSAGES = {
   ITEM_UPDATED: "商品を更新しました",
   ITEM_DELETED: "商品を削除しました",
 } as const;
-

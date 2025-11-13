@@ -50,8 +50,6 @@ export default function AdminInventoryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItemId]);
 
-
-
   const fetchAvailableAccounts = async (itemId: string) => {
     setIsAccountsLoading(true);
     try {

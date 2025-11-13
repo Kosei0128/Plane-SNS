@@ -27,11 +27,13 @@
 ### 3.2. プロジェクトのセットアップ
 
 1.  **リポジトリをクローンします。**
+
     ```bash
     git clone https://github.com/Kosei0128/Plane-SNS.git
     ```
 
 2.  **プロジェクトディレクトリに移動します。**
+
     ```bash
     cd Plane-SNS
     ```
@@ -65,6 +67,7 @@ Supabaseの管理画面にある **SQL Editor** を使って、以下の手順�
 **目的**: データベースを完全に初期状態に戻したい場合のみ実行します。
 
 **SQLエディタに貼り付けるコード:**
+
 ```sql
 -- 警告: このスクリプトを実行すると、publicスキーマ内のすべてのテーブルとデータが削除されます。
 DROP SCHEMA public CASCADE;
@@ -78,6 +81,7 @@ CREATE SCHEMA public;
 **目的**: データベースのテーブル、権限、基本的な機能をすべて構築します。
 
 **SQLエディタに貼り付けるコード:**
+
 ```sql
 -- ====================================================================
 -- Plane SNS Master Schema
@@ -336,6 +340,7 @@ ON CONFLICT (id) DO NOTHING;
 **目的**: 売上分析などに使用する便利な関数をデータベースに追加します。
 
 **SQLエディタに貼り付けるコード:**
+
 ```sql
 -- Function to get top selling items
 CREATE OR REPLACE FUNCTION get_top_selling_items(limit_count INT)
@@ -398,9 +403,11 @@ $$ LANGUAGE plpgsql;
 ## 6. その他のユーティリティ
 
 ### `get_paypay_tokens.py`
+
 PayPay連携に必要なトークンを取得するためのPythonスクリプトです。使用方法はスクリプト内のコメントを参照してください。
 
 ### トランザクションデータの削除 (`sql/01_truncate_data.sql`)
+
 ユーザー情報や商品マスターは残したまま、注文履歴や残高履歴などのトランザクションデータのみを削除したい場合に使用します。デバッグやテストの際に便利です。
 
 ## 7. プロジェクト構造の概要

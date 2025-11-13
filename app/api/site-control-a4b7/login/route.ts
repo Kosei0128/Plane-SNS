@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = validateAdminCredentials(username, password);
+    const user = await validateAdminCredentials(username, password);
 
     if (!user) {
       return NextResponse.json(

@@ -101,7 +101,7 @@ VALUES
 -- 購入可能なアカウント情報を追加
 -- 注: 実際のアカウント情報は絶対に公開しないでください
 INSERT INTO public.purchased_accounts (item_id, account_info, is_purchased)
-SELECT 
+SELECT
   id,
   'email: test' || generate_series || '@example.com, password: test' || generate_series,
   FALSE
@@ -223,6 +223,7 @@ PAYPAY_REFRESH_TOKEN=your-refresh-token-here
 **原因**: 環境変数が正しく設定されていません。
 
 **解決方法**:
+
 1. `.env.local`ファイルが存在することを確認
 2. `ADMIN_JWT_SECRET`が設定されていることを確認
 3. 開発サーバーを再起動
@@ -232,6 +233,7 @@ PAYPAY_REFRESH_TOKEN=your-refresh-token-here
 **原因**: Supabaseの環境変数が設定されていません。
 
 **解決方法**:
+
 1. Supabaseダッシュボードから正しいAPIキーをコピー
 2. `.env.local`に設定
 3. 開発サーバーを再起動
@@ -241,6 +243,7 @@ PAYPAY_REFRESH_TOKEN=your-refresh-token-here
 **原因**: ストアドプロシージャが作成されていません。
 
 **解決方法**:
+
 1. Supabaseの「SQL Editor」で`sql/create_order_transaction.sql`を実行
 2. エラーがないことを確認
 
@@ -249,6 +252,7 @@ PAYPAY_REFRESH_TOKEN=your-refresh-token-here
 **原因**: パスワードが正しくない、または環境変数が設定されていません。
 
 **解決方法**:
+
 1. デフォルトパスワード`ChangeMe123!`を試す
 2. 環境変数`ADMIN_PASSWORD_HASH`が正しく設定されているか確認
 3. ブラウザのコンソールでエラーメッセージを確認
@@ -264,4 +268,3 @@ PAYPAY_REFRESH_TOKEN=your-refresh-token-here
 ## サポート
 
 問題が解決しない場合は、GitHubのIssuesで質問してください。
-

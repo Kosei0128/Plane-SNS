@@ -8,7 +8,6 @@ export function Footer() {
   // This can be done with a simple onClick handler in a client component
   // or by creating a dedicated ScrollToTopButton component.
 
-
   return (
     <footer className="bg-[#1c1c27] text-slate-300">
       <div className="mx-auto max-w-7xl px-6 py-12">

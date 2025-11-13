@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  ShoppingCart,
-  Menu,
-  LogIn,
-  LogOut,
-  Clock,
-  Settings,
-  Coins,
-} from "lucide-react";
+import { ShoppingCart, Menu, LogIn, LogOut, Clock, Settings, Coins } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCartStore } from "@/lib/cart-store";

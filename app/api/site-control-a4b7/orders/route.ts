@@ -14,13 +14,20 @@ const supabaseAdmin = createClient(
   },
 );
 
+// Async authentication check using JWT from cookie
+async function checkAuth(request: NextRequest) {
+  const token = request.cookies.get("admin-session")?.value;
+  if (!token) return null;
+  return await verifyAdminSession(token);
+}
+
 /**
  * GET /api/site-control-a4b7/orders
  * Fetches all orders for the admin dashboard.
  */
 export async function GET(request: NextRequest) {
   // 1. Admin authentication
-  const admin = await verifyAdminSession(request.cookies.get("admin-session")?.value);
+  const admin = await checkAuth(request);
   if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

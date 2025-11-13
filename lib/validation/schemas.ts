@@ -24,7 +24,11 @@ export const itemCreateSchema = z.object({
     .min(1, "商品説明は必須です")
     .max(2000, "商品説明は2000文字以内で入力してください"),
   imageUrl: z.string().url("画像URLの形式が正しくありません").optional(),
-  rating: z.number().min(0, "評価は0以上で入力してください").max(5, "評価は5以下で入力してください").optional(),
+  rating: z
+    .number()
+    .min(0, "評価は0以上で入力してください")
+    .max(5, "評価は5以下で入力してください")
+    .optional(),
   category: z.string().max(50, "カテゴリーは50文字以内で入力してください").optional(),
 });
 
@@ -67,7 +71,10 @@ export const createOrderSchema = z.object({
     .number()
     .int("合計金額は整数で入力してください")
     .min(1, "合計金額は1円以上で入力してください")
-    .max(MAX_ORDER_AMOUNT, `合計金額は${MAX_ORDER_AMOUNT.toLocaleString()}円以下で入力してください`),
+    .max(
+      MAX_ORDER_AMOUNT,
+      `合計金額は${MAX_ORDER_AMOUNT.toLocaleString()}円以下で入力してください`,
+    ),
 });
 
 // ============================================
@@ -79,17 +86,22 @@ export const chargeSchema = z.object({
     .number()
     .int("チャージ金額は整数で入力してください")
     .min(MIN_CHARGE_AMOUNT, `チャージ金額は${MIN_CHARGE_AMOUNT}円以上で入力してください`)
-    .max(MAX_CHARGE_AMOUNT, `チャージ金額は${MAX_CHARGE_AMOUNT.toLocaleString()}円以下で入力してください`),
+    .max(
+      MAX_CHARGE_AMOUNT,
+      `チャージ金額は${MAX_CHARGE_AMOUNT.toLocaleString()}円以下で入力してください`,
+    ),
   paymentUrl: z
     .string()
     .min(1, "決済リンクを入力してください")
     .url("決済リンクの形式が正しくありません")
     .refine(
       (url) =>
-        url.includes("pay.paypay.ne.jp") || url.includes("paypay.ne.jp") || url.includes("qr.paypay.ne.jp"),
+        url.includes("pay.paypay.ne.jp") ||
+        url.includes("paypay.ne.jp") ||
+        url.includes("qr.paypay.ne.jp"),
       {
         message: "有効なPayPayリンクを入力してください",
-      }
+      },
     ),
   passcode: z.string().max(20, "パスコードは20文字以内で入力してください").optional(),
 });
@@ -119,8 +131,14 @@ export const searchSchema = z.object({
 // ============================================
 
 export const adminLoginSchema = z.object({
-  username: z.string().min(1, "ユーザー名を入力してください").max(50, "ユーザー名は50文字以内で入力してください"),
-  password: z.string().min(1, "パスワードを入力してください").max(100, "パスワードは100文字以内で入力してください"),
+  username: z
+    .string()
+    .min(1, "ユーザー名を入力してください")
+    .max(50, "ユーザー名は50文字以内で入力してください"),
+  password: z
+    .string()
+    .min(1, "パスワードを入力してください")
+    .max(100, "パスワードは100文字以内で入力してください"),
 });
 
 // ============================================
@@ -133,13 +151,13 @@ export const paginationSchema = z.object({
     .transform((val) => parseInt(val, 10))
     .pipe(z.number().int().min(1, "ページ番号は1以上で入力してください"))
     .optional()
-    .default("1"),
+    .default(1),
   limit: z
     .string()
     .transform((val) => parseInt(val, 10))
     .pipe(z.number().int().min(1).max(100, "1ページあたりの表示件数は100件までです"))
     .optional()
-    .default("20"),
+    .default(20),
 });
 
 // ============================================
@@ -148,20 +166,22 @@ export const paginationSchema = z.object({
 
 /**
  * Zodスキーマを使用してデータを検証します
- * 
+ *
  * @param schema Zodスキーマ
  * @param data 検証するデータ
  * @returns 検証結果
  */
-export function validateData<T>(schema: z.ZodSchema<T>, data: unknown): { success: true; data: T } | { success: false; errors: string[] } {
+export function validateData<T>(
+  schema: z.ZodSchema<T>,
+  data: unknown,
+): { success: true; data: T } | { success: false; errors: string[] } {
   const result = schema.safeParse(data);
 
   if (result.success) {
     return { success: true, data: result.data };
   }
 
-  const errors = result.error.errors.map((err) => `${err.path.join(".")}: ${err.message}`);
+  const errors = result.error.issues.map((err) => `${err.path.join(".")}: ${err.message}`);
 
   return { success: false, errors };
 }
-

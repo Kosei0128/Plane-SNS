@@ -19,7 +19,7 @@ const supabaseAdmin = createClient(
 /**
  * 注文を作成し、購入したアカウント情報を保存
  * POST /api/orders
- * 
+ *
  * トランザクション処理により、データの整合性を保証します
  */
 export async function POST(request: NextRequest) {
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     if (!authHeader) {
       return NextResponse.json<ApiError>(
         { success: false, message: ERROR_MESSAGES.AUTH_REQUIRED },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json<ApiError>(
         { success: false, message: ERROR_MESSAGES.AUTH_REQUIRED },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -59,14 +59,14 @@ export async function POST(request: NextRequest) {
 
     const validation = createOrderSchema.safeParse(body);
     if (!validation.success) {
-      const errors = validation.error.errors.map((err) => `${err.path.join(".")}: ${err.message}`);
+      const errors = validation.error.issues.map((err) => `${err.path.join(".")}: ${err.message}`);
       return NextResponse.json<ApiError>(
         {
           success: false,
           message: ERROR_MESSAGES.INVALID_INPUT,
           error: errors.join(", "),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -95,20 +95,20 @@ export async function POST(request: NextRequest) {
       if (rpcError.message.includes("残高が不足")) {
         return NextResponse.json<ApiError>(
           { success: false, message: ERROR_MESSAGES.INSUFFICIENT_BALANCE },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       if (rpcError.message.includes("在庫不足")) {
         return NextResponse.json<ApiError>(
           { success: false, message: rpcError.message },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       return NextResponse.json<ApiError>(
         { success: false, message: ERROR_MESSAGES.SERVER_ERROR, error: rpcError.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     console.error("=== Order Creation Error ===", message);
     return NextResponse.json<ApiError>(
       { success: false, message: ERROR_MESSAGES.SERVER_ERROR, error: message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -146,7 +146,7 @@ interface PurchasedAccountFromDB {
 /**
  * ユーザーの注文履歴を取得
  * GET /api/orders
- * 
+ *
  * ページネーションに対応しています
  */
 export async function GET(request: NextRequest) {
@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
     if (!authHeader) {
       return NextResponse.json<ApiError>(
         { success: false, message: ERROR_MESSAGES.AUTH_REQUIRED },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json<ApiError>(
         { success: false, message: ERROR_MESSAGES.AUTH_REQUIRED },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -212,7 +212,7 @@ export async function GET(request: NextRequest) {
       console.error("Failed to fetch orders:", ordersError);
       return NextResponse.json<ApiError>(
         { success: false, message: ERROR_MESSAGES.DATABASE_ERROR },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -269,8 +269,7 @@ export async function GET(request: NextRequest) {
     console.error("Orders fetch error:", error);
     return NextResponse.json<ApiError>(
       { success: false, message: ERROR_MESSAGES.SERVER_ERROR },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

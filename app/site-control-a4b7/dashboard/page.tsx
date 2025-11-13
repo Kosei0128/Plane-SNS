@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Package, ShoppingBag, Users, TrendingUp, LogOut, Loader2, AlertTriangle } from "lucide-react";
+import { Package, ShoppingBag, Users, TrendingUp, LogOut, AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type AnalyticsData = {
@@ -56,10 +56,30 @@ export default function AdminDashboard() {
   };
 
   const stats = [
-    { label: "総売上", value: `¥${analytics?.totalRevenue.toLocaleString() ?? 0}`, icon: TrendingUp, color: "bg-orange-500" },
-    { label: "総注文数", value: analytics?.totalOrders.toLocaleString() ?? 0, icon: ShoppingBag, color: "bg-green-500" },
-    { label: "総商品数", value: analytics?.totalItems.toLocaleString() ?? 0, icon: Package, color: "bg-blue-500" },
-    { label: "総ユーザー数", value: analytics?.totalUsers.toLocaleString() ?? 0, icon: Users, color: "bg-purple-500" },
+    {
+      label: "総売上",
+      value: `¥${analytics?.totalRevenue.toLocaleString() ?? 0}`,
+      icon: TrendingUp,
+      color: "bg-orange-500",
+    },
+    {
+      label: "総注文数",
+      value: analytics?.totalOrders.toLocaleString() ?? 0,
+      icon: ShoppingBag,
+      color: "bg-green-500",
+    },
+    {
+      label: "総商品数",
+      value: analytics?.totalItems.toLocaleString() ?? 0,
+      icon: Package,
+      color: "bg-blue-500",
+    },
+    {
+      label: "総ユーザー数",
+      value: analytics?.totalUsers.toLocaleString() ?? 0,
+      icon: Users,
+      color: "bg-purple-500",
+    },
   ];
 
   const quickLinks = [
@@ -67,7 +87,11 @@ export default function AdminDashboard() {
     { href: "/site-control-a4b7/orders", label: "注文管理", description: "注文状況の確認" },
     { href: "/site-control-a4b7/history", label: "変更履歴", description: "商品の編集履歴" },
     { href: "/site-control-a4b7/users", label: "ユーザー管理", description: "ユーザー一覧" },
-    { href: "/site-control-a4b7/inventory", label: "在庫管理", description: "アカウント情報の追加・削除" },
+    {
+      href: "/site-control-a4b7/inventory",
+      label: "在庫管理",
+      description: "アカウント情報の追加・削除",
+    },
     { href: "/site-control-a4b7/settings", label: "設定", description: "システム設定" },
   ];
 
@@ -104,15 +128,20 @@ export default function AdminDashboard() {
           <h2 className="mb-6 text-2xl font-bold text-brand-blue">ダッシュボード</h2>
           {isLoading ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {Array(4).fill(0).map((_, index) => (
-                <div key={index} className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                  <div className="h-12 w-12 rounded-xl bg-slate-200 animate-pulse"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 w-20 rounded bg-slate-200 animate-pulse"></div>
-                    <div className="h-8 w-24 rounded bg-slate-200 animate-pulse"></div>
+              {Array(4)
+                .fill(0)
+                .map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                  >
+                    <div className="h-12 w-12 rounded-xl bg-slate-200 animate-pulse"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 w-20 rounded bg-slate-200 animate-pulse"></div>
+                      <div className="h-8 w-24 rounded bg-slate-200 animate-pulse"></div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           ) : error ? (
             <div className="rounded-lg bg-red-50 p-4 text-red-700 flex items-center gap-3">
@@ -125,8 +154,13 @@ export default function AdminDashboard() {
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {stats.map((stat) => (
-                <div key={stat.label} className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${stat.color}`}>
+                <div
+                  key={stat.label}
+                  className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                >
+                  <div
+                    className={`flex h-12 w-12 items-center justify-center rounded-xl ${stat.color}`}
+                  >
                     <stat.icon className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -149,14 +183,18 @@ export default function AdminDashboard() {
                   <thead>
                     <tr className="border-b border-slate-200">
                       <th className="p-3 text-sm font-semibold text-slate-600">商品名</th>
-                      <th className="p-3 text-sm font-semibold text-slate-600 text-right">販売数</th>
+                      <th className="p-3 text-sm font-semibold text-slate-600 text-right">
+                        販売数
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {analytics.topSellingItems.map((item) => (
                       <tr key={item.item_id} className="border-b border-slate-100">
                         <td className="p-3 text-sm text-slate-800">{item.title}</td>
-                        <td className="p-3 text-sm text-slate-800 text-right font-semibold">{item.total_quantity}</td>
+                        <td className="p-3 text-sm text-slate-800 text-right font-semibold">
+                          {item.total_quantity}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -178,8 +216,12 @@ export default function AdminDashboard() {
                   <tbody>
                     {analytics.dailySales.map((sale) => (
                       <tr key={sale.sale_date} className="border-b border-slate-100">
-                        <td className="p-3 text-sm text-slate-800">{new Date(sale.sale_date).toLocaleDateString('ja-JP')}</td>
-                        <td className="p-3 text-sm text-slate-800 text-right font-semibold">¥{sale.total_revenue.toLocaleString()}</td>
+                        <td className="p-3 text-sm text-slate-800">
+                          {new Date(sale.sale_date).toLocaleDateString("ja-JP")}
+                        </td>
+                        <td className="p-3 text-sm text-slate-800 text-right font-semibold">
+                          ¥{sale.total_revenue.toLocaleString()}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

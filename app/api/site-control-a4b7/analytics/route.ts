@@ -14,16 +14,29 @@ const supabaseAdmin = createClient(
   },
 );
 
+// Async authentication check using JWT from cookie
+async function checkAuth(request: NextRequest) {
+  const token = request.cookies.get("admin-session")?.value;
+  if (!token) return null;
+  return await verifyAdminSession(token);
+}
+
 export async function GET(request: NextRequest) {
   // 1. Check for admin authentication from HttpOnly cookie
-  const token = request.cookies.get("admin-session")?.value;
-  const admin = await verifyAdminSession(token);
+  const admin = await checkAuth(request);
   if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
     // 2. Fetch all necessary data in parallel
-    const [totalRevenueData, totalOrdersData, topItemsData, dailySalesData, totalUsersData, totalItemsData] = await Promise.all([
+    const [
+      totalRevenueData,
+      totalOrdersData,
+      topItemsData,
+      dailySalesData,
+      totalUsersData,
+      totalItemsData,
+    ] = await Promise.all([
       supabaseAdmin.from("orders").select("total_amount"),
       supabaseAdmin.from("orders").select("id", { count: "exact" }),
       supabaseAdmin.rpc("get_top_selling_items", { limit_count: 5 }),
@@ -33,7 +46,8 @@ export async function GET(request: NextRequest) {
     ]);
 
     // 3. Process the data
-    const totalRevenue = totalRevenueData.data?.reduce((sum, order) => sum + order.total_amount, 0) ?? 0;
+    const totalRevenue =
+      totalRevenueData.data?.reduce((sum, order) => sum + order.total_amount, 0) ?? 0;
     const totalOrders = totalOrdersData.count ?? 0;
     const totalUsers = totalUsersData.count ?? 0;
     const totalItems = totalItemsData.count ?? 0;
@@ -53,7 +67,6 @@ export async function GET(request: NextRequest) {
         dailySales,
       },
     });
-
   } catch (error) {
     console.error("Analytics Error:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";

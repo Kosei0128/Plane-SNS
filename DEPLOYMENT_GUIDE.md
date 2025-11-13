@@ -233,30 +233,30 @@ sudo certbot --nginx -d your-domain.com
 
 これらの変数は必ず設定する必要があります。
 
-| 変数名 | 説明 | 例 |
-|--------|------|-----|
-| `NEXT_PUBLIC_SUPABASE_URL` | SupabaseプロジェクトのURL | `https://xxx.supabase.co` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabaseの公開キー | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabaseのサービスロールキー | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
-| `ADMIN_JWT_SECRET` | 管理者認証用のJWTシークレット | `your-secret-key-here` |
+| 変数名                          | 説明                          | 例                                        |
+| ------------------------------- | ----------------------------- | ----------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | SupabaseプロジェクトのURL     | `https://xxx.supabase.co`                 |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabaseの公開キー            | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Supabaseのサービスロールキー  | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
+| `ADMIN_JWT_SECRET`              | 管理者認証用のJWTシークレット | `your-secret-key-here`                    |
 
 ### オプションの環境変数
 
 必要に応じて設定してください。
 
-| 変数名 | 説明 | デフォルト値 |
-|--------|------|-------------|
-| `ADMIN_USERNAME` | 管理者のユーザー名 | `admin` |
-| `ADMIN_PASSWORD_HASH` | 管理者パスワードのハッシュ | - |
-| `EDITOR_USERNAME` | 編集者のユーザー名 | `editor` |
-| `EDITOR_PASSWORD_HASH` | 編集者パスワードのハッシュ | - |
-| `ADMIN_SESSION_DURATION` | セッションの有効期限 | `7d` |
-| `PAYPAY_ACCESS_TOKEN` | PayPayアクセストークン | - |
-| `PAYPAY_REFRESH_TOKEN` | PayPayリフレッシュトークン | - |
-| `PYTHON_PATH` | Pythonのパス | `python` |
-| `UPSTASH_REDIS_REST_URL` | Upstash RedisのURL | - |
-| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redisのトークン | - |
-| `NODE_ENV` | 実行環境 | `production` |
+| 変数名                     | 説明                       | デフォルト値 |
+| -------------------------- | -------------------------- | ------------ |
+| `ADMIN_USERNAME`           | 管理者のユーザー名         | `admin`      |
+| `ADMIN_PASSWORD_HASH`      | 管理者パスワードのハッシュ | -            |
+| `EDITOR_USERNAME`          | 編集者のユーザー名         | `editor`     |
+| `EDITOR_PASSWORD_HASH`     | 編集者パスワードのハッシュ | -            |
+| `ADMIN_SESSION_DURATION`   | セッションの有効期限       | `7d`         |
+| `PAYPAY_ACCESS_TOKEN`      | PayPayアクセストークン     | -            |
+| `PAYPAY_REFRESH_TOKEN`     | PayPayリフレッシュトークン | -            |
+| `PYTHON_PATH`              | Pythonのパス               | `python`     |
+| `UPSTASH_REDIS_REST_URL`   | Upstash RedisのURL         | -            |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redisのトークン    | -            |
+| `NODE_ENV`                 | 実行環境                   | `production` |
 
 ## データベースの本番環境設定
 
@@ -338,11 +338,11 @@ export default {
   async headers() {
     return [
       {
-        source: '/:all*(svg|jpg|png|webp|gif)',
+        source: "/:all*(svg|jpg|png|webp|gif)",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },
@@ -410,4 +410,3 @@ UptimeRobotなどのサービスを使用して、サイトの稼働状況を監
 - メール: support@plane-sns.com
 - Discord: [招待リンク]
 - GitHub Issues: [リンク]
-

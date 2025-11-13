@@ -22,7 +22,7 @@ interface Item {
   image_url: string;
   rating: number;
   category: string;
-  [key: string]: any; // Allow for other properties
+  [key: string]: unknown; // Allow for other properties
 }
 
 // Helper function to get admin's profile UUID from email

@@ -43,8 +43,6 @@ export default function AdminUsersPage() {
     loadUsers();
   }, [loadUsers]);
 
-
-
   const handleEditBalance = (user: User) => {
     setEditingUser(user);
     setNewBalance(user.balance);
